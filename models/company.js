@@ -38,12 +38,12 @@ class Company {
                     description,
                     num_employees AS "numEmployees",
                     logo_url AS "logoUrl"`, [
-          handle,
-          name,
-          description,
-          numEmployees,
-          logoUrl,
-        ],
+      handle,
+      name,
+      description,
+      numEmployees,
+      logoUrl,
+    ],
     );
     const company = result.rows[0];
 
@@ -56,6 +56,30 @@ class Company {
    * */
 
   static async findAll() {
+
+    // do filter in findAll(like, min, max)
+    // if there like min max
+    // check if min > max
+
+    // ex: we have like min
+    // let queryMiddle =''
+    // queryMiddle = `WHERE  name= ILIKE min= `
+
+    // queryFirst =`
+    //         SELECT handle,
+    //         name,
+    //         description,
+    //         num_employees AS "numEmployees",
+    //         logo_url      AS "logoUrl"
+    //
+    //   querySecond =
+    //  `FROM companies
+    //  ORDER BY name`
+
+    // if(queryMiddle){
+    //   query = queryFirst+queryMiddle+querySecond
+    // }
+    // const companiesRes = await db.query(query)
     const companiesRes = await db.query(`
         SELECT handle,
                name,
@@ -106,11 +130,11 @@ class Company {
 
   static async update(handle, data) {
     const { setCols, values } = sqlForPartialUpdate(
-        data,
-        {
-          numEmployees: "num_employees",
-          logoUrl: "logo_url",
-        });
+      data,
+      {
+        numEmployees: "num_employees",
+        logoUrl: "logo_url",
+      });
     const handleVarIdx = "$" + (values.length + 1);
 
     const querySql = `
@@ -146,7 +170,21 @@ class Company {
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
+
+
+  static async filter(companies, nameLike, minEmployees, minEmployees) {
+
+
+    // filter by name
+    const filterByNameCompanies = companies.filter(nameLike);
+    // filter by min
+    const filterByMinEmployees = filterByNameCompanies.filter(minEmployees);
+
+    // filter by max
+
+    const filterByMinEmployees = filterByMinEmployees.filter(maxEmployees);
+
+  }
+
 }
-
-
 module.exports = Company;
