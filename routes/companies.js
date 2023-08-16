@@ -11,6 +11,7 @@ const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
+const companyFilterSchema = require("../schemas/companyFilter.json");
 
 const router = new express.Router();
 
@@ -51,7 +52,37 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-  const companies = await Company.findAll();
+
+  let { minEmployees, maxEmployees } = req.query;
+  console.log('minEmployees =', minEmployees);
+  console.log('maxEmployees =', maxEmployees);
+  if (minEmployees) {
+    console.log('Number(minEmployees)=', Number(minEmployees));
+    req.query.minEmployees = parseInt(minEmployees);
+    // throw new BadRequestError();
+  }
+
+  if (maxEmployees) {
+    req.query.maxEmployees = Number(maxEmployees);
+    // throw new BadRequestError();
+  }
+
+  const validator = jsonschema.validate(
+    {
+      minEmployees: parseInt(minEmployees),
+      maxEmployees: parseInt(maxEmployees)
+    },
+    companyFilterSchema,
+    { required: true }
+  );
+
+  if (!validator.valid) {
+    const errs = validator.errors.map(e => e.stack);
+    throw new BadRequestError(errs);
+  }
+
+  // schecma.validate
+  const companies = await Company.findAll(req.query);
 
   // make a filter class method filter(companies,like, min, max)
   // Company.filter(companies,like, min, max)

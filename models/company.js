@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helpers/sql");
+const { sqlForPartialUpdate, sqlForFilter } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -55,39 +55,70 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll() {
+  static async findAll(dataToFilter) {
 
     // do filter in findAll(like, min, max)
-    // if there like min max
-    // check if min > max
+    //  minEmployees
+    //  maxEmployees
+    //  nameLike (will find case-insensitive, partial matches)
+    const { minEmployees, maxEmployees, nameLike } = dataToFilter;
 
-    // ex: we have like min
-    // let queryMiddle =''
-    // queryMiddle = `WHERE  name= ILIKE min= `
+    if (minEmployees !== undefined &&
+      minEmployees !== undefined &&
+      (minEmployees > maxEmployees)) {
+      throw new BadRequestError(`minEmployees should be less than maxEmployees`);
+    }
 
-    // queryFirst =`
-    //         SELECT handle,
+    let querySql;
+    const { filterCols, values } = sqlForFilter(dataToFilter);
+
+
+    // const querySql = `
+    //     UPDATE companies
+    //     SET ${setCols}
+    //     WHERE handle = ${handleVarIdx}
+    //     RETURNING
+    //         handle,
     //         name,
     //         description,
     //         num_employees AS "numEmployees",
-    //         logo_url      AS "logoUrl"
-    //
-    //   querySecond =
-    //  `FROM companies
-    //  ORDER BY name`
+    //         logo_url AS "logoUrl"`;
+    // const result = await db.query(querySql, [...values, handle]);
+    // const company = result.rows[0];
 
-    // if(queryMiddle){
-    //   query = queryFirst+queryMiddle+querySecond
-    // }
-    // const companiesRes = await db.query(query)
-    const companiesRes = await db.query(`
-        SELECT handle,
-               name,
-               description,
-               num_employees AS "numEmployees",
-               logo_url      AS "logoUrl"
-        FROM companies
-        ORDER BY name`);
+    if (filterCols) { // values =['apple', 32]
+      console.log('in findAll if filterCols=', filterCols);
+      querySql = `SELECT handle,
+                           name,
+                           description,
+                           num_employees AS "numEmployees",
+                           logo_url AS "logoUrl"
+                           FROM companies
+                     WHERE ${filterCols}
+                     ORDER BY name`;
+    } else { // values = []
+      console.log('in findAll if !filterCols=');
+      querySql = `SELECT handle,
+                         name,
+                         description,
+                         num_employees AS "numEmployees",
+                         logo_url AS "logoUrl"
+                  FROM companies
+                  ORDER BY name`;
+    }
+
+
+
+    const companiesRes = await db.query(querySql, values);
+
+    // const companiesRes = await db.query(`
+    //     SELECT handle,
+    //            name,
+    //            description,
+    //            num_employees AS "numEmployees",
+    //            logo_url      AS "logoUrl"
+    //     FROM companies
+    //     ORDER BY name`);
     return companiesRes.rows;
   }
 
@@ -170,21 +201,5 @@ class Company {
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
-
-
-  static async filter(companies, nameLike, minEmployees, minEmployees) {
-
-
-    // filter by name
-    const filterByNameCompanies = companies.filter(nameLike);
-    // filter by min
-    const filterByMinEmployees = filterByNameCompanies.filter(minEmployees);
-
-    // filter by max
-
-    const filterByMinEmployees = filterByMinEmployees.filter(maxEmployees);
-
-  }
-
 }
 module.exports = Company;
