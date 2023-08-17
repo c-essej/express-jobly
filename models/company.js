@@ -57,11 +57,10 @@ class Company {
    * - maxEmployees
    * - nameLike (will find case-insensitive, partial matches)
    *
-   *
+   * if nothing to filter, return all companies
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
-  // TODO: may make the whole WHERE clause a variable,
-  // then we can have one query
+
   static async findAll(dataToFilter) {
 
     if (dataToFilter === undefined || Object.keys(dataToFilter).length === 0) {

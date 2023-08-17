@@ -12,6 +12,7 @@ const {
   commonAfterEach,
   commonAfterAll,
   u1Token,
+  admin1Token,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -22,7 +23,7 @@ afterAll(commonAfterAll);
 /************************************** POST /users */
 
 describe("POST /users", function () {
-  test("works for users: create non-admin", async function () {
+  test("error for users: create non-admin", async function () {
     const resp = await request(app)
         .post("/users")
         .send({
@@ -34,19 +35,16 @@ describe("POST /users", function () {
           isAdmin: false,
         })
         .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(201);
+    expect(resp.statusCode).toEqual(401);
     expect(resp.body).toEqual({
-      user: {
-        username: "u-new",
-        firstName: "First-new",
-        lastName: "Last-newL",
-        email: "new@email.com",
-        isAdmin: false,
-      }, token: expect.any(String),
+      "error": {
+        "message": "Unauthorized",
+        "status": 401
+      }
     });
   });
 
-  test("works for users: create admin", async function () {
+  test("error for users: create admin", async function () {
     const resp = await request(app)
         .post("/users")
         .send({
@@ -58,15 +56,12 @@ describe("POST /users", function () {
           isAdmin: true,
         })
         .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(201);
+    expect(resp.statusCode).toEqual(401);
     expect(resp.body).toEqual({
-      user: {
-        username: "u-new",
-        firstName: "First-new",
-        lastName: "Last-newL",
-        email: "new@email.com",
-        isAdmin: true,
-      }, token: expect.any(String),
+      "error": {
+        "message": "Unauthorized",
+        "status": 401
+      }
     });
   });
 
@@ -84,17 +79,27 @@ describe("POST /users", function () {
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("bad request if missing data", async function () {
+  test("error for anon: creating a user", async function () {
     const resp = await request(app)
         .post("/users")
         .send({
-          username: "u-new",
+          username: "bob1",
+          password: "bobpassword1",
+          firstName: "bob1",
+          lastName: "bob1",
+          email: "bob1@gmail.com",
+          isAdmin: false
         })
-        .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(400);
-  });
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "Unauthorized",
+        "status": 401
+      }
+    });
+  })
 
-  test("bad request if invalid data", async function () {
+  test("works for admin: creating non-admin", async function () {
     const resp = await request(app)
         .post("/users")
         .send({
@@ -102,23 +107,111 @@ describe("POST /users", function () {
           firstName: "First-new",
           lastName: "Last-newL",
           password: "password-new",
-          email: "not-an-email",
-          isAdmin: true,
+          email: "new@email.com",
+          isAdmin: false,
         })
-        .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(400);
+        .set("authorization", `Bearer ${admin1Token}`);
+    expect(resp.statusCode).toEqual(201);
+    expect(resp.body).toEqual({
+      user: {
+        username: "u-new",
+        firstName: "First-new",
+        lastName: "Last-newL",
+        email: "new@email.com",
+        isAdmin: false,
+      },
+      token: expect.any(String)
+    });
   });
+
+  test("works for admin: creating admin", async function () {
+    const resp = await request(app)
+        .post("/users")
+        .send({
+          username: "u-newer",
+          firstName: "First-newer",
+          lastName: "Last-newerL",
+          password: "password-newer",
+          email: "newer@email.com",
+          isAdmin: true
+        })
+        .set("authorization", `Bearer ${admin1Token}`);
+    expect(resp.statusCode).toEqual(201);
+    expect(resp.body).toEqual({
+      user: {
+        username: "u-newer",
+        firstName: "First-newer",
+        lastName: "Last-newerL",
+        email: "newer@email.com",
+        isAdmin: true,
+      },
+      token: expect.any(String)
+  });
+});
+
+  test("incorrect type in input field", async function () {
+    const resp = await request(app)
+        .post("/users")
+        .send({
+          username: 1,
+          firstName: "First-newer",
+          lastName: "Last-newerL",
+          password: "password-newer",
+          email: "newer@email.com",
+          isAdmin: true
+        })
+        .set("authorization", `Bearer ${admin1Token}`);
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": [
+          "instance.username is not of a type(s) string"
+        ],
+        "status": 400
+      }
+    });
+  });
+
+  test("missing input field", async function () {
+    const resp = await request(app)
+        .post("/users")
+        .send({
+          username: "u-newer1",
+          firstName: "First-newer1",
+          lastName: "Last-newerL1",
+          password: "password-newer1",
+          isAdmin: true
+        })
+        .set("authorization", `Bearer ${admin1Token}`);
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": [
+          "instance requires property \"email\""
+        ],
+        "status": 400
+      }
+    });
+  });
+
 });
 
 /************************************** GET /users */
 
 describe("GET /users", function () {
-  test("works for users", async function () {
+  test("works for admin", async function () {
     const resp = await request(app)
         .get("/users")
-        .set("authorization", `Bearer ${u1Token}`);
+        .set("authorization", `Bearer ${admin1Token}`);
     expect(resp.body).toEqual({
       users: [
+        {
+          username: "admin1",
+          firstName: "ADMIN1F",
+          lastName: "ADMIN1L",
+          email: "admin1@gmail.com",
+          isAdmin: true,
+        },
         {
           username: "u1",
           firstName: "U1F",
@@ -141,6 +234,19 @@ describe("GET /users", function () {
           isAdmin: false,
         },
       ],
+    });
+  });
+
+  test("error for non-admin", async function () {
+    const resp = await request(app)
+        .get("/users")
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "Unauthorized",
+        "status": 401
+      }
     });
   });
 

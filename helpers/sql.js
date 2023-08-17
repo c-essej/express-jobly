@@ -39,7 +39,7 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 }
 
 
-/** takes in an object dataToFilter and  converts them into queries and values
+/** takes in an object dataToFilter and converts it into queries and values
  * to insert into the queries.
  *
  * dataToFilter = {
@@ -53,7 +53,8 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
     values: ['%davis%', 600, 850]
   }
  */
-//TODO: Can use if/else ,put this in the model as a static method
+//TODO: better for organization if this is a static  method
+//TODO: could simplify with three if conditions
 function sqlForFilter(dataToFilter) {
   const keys = Object.keys(dataToFilter);
 
