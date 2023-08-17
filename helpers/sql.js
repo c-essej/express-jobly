@@ -53,7 +53,7 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
     values: ['%davis%', 600, 850]
   }
  */
-
+//TODO: Can use if/else ,put this in the model as a static method
 function sqlForFilter(dataToFilter) {
   const keys = Object.keys(dataToFilter);
 
