@@ -61,65 +61,85 @@ class Company {
     //  minEmployees
     //  maxEmployees
     //  nameLike (will find case-insensitive, partial matches)
-    const { minEmployees, maxEmployees, nameLike } = dataToFilter;
-
-    if (minEmployees !== undefined &&
-      minEmployees !== undefined &&
-      (minEmployees > maxEmployees)) {
-      throw new BadRequestError(`minEmployees should be less than maxEmployees`);
-    }
-
+    let filterCols;
+    let values;
     let querySql;
-    const { filterCols, values } = sqlForFilter(dataToFilter);
+    if (dataToFilter !== undefined){
+      console.log('******dataToFilter', dataToFilter);
+
+      let { filterCols, values } = sqlForFilter(dataToFilter);
+      console.log('****line70 filterCols', filterCols);
+      console.log('*****line 71 values', values);
+      filterCols = filterCols;
+      values = values;
+
+      const { minEmployees, maxEmployees, nameLike } = dataToFilter;
+
+      console.log('*****minEmployees', minEmployees);
+      console.log('*****maxEmployees', maxEmployees);
+
+      if (minEmployees !== undefined &&
+        minEmployees !== undefined &&
+        (minEmployees > maxEmployees)) {
+        throw new BadRequestError(`minEmployees should be less than maxEmployees`);
+      }
+
+      // const querySql = `
+      //     UPDATE companies
+      //     SET ${setCols}
+      //     WHERE handle = ${handleVarIdx}
+      //     RETURNING
+      //         handle,
+      //         name,
+      //         description,
+      //         num_employees AS "numEmployees",
+      //         logo_url AS "logoUrl"`;
+      // const result = await db.query(querySql, [...values, handle]);
+      // const company = result.rows[0];
+
+      if (filterCols) { // values =['apple', 32]
+        console.log('in findAll if filterCols=', filterCols);
+        querySql = `SELECT handle,
+                             name,
+                             description,
+                             num_employees AS "numEmployees",
+                             logo_url AS "logoUrl"
+                             FROM companies
+                       WHERE ${filterCols}
+                       ORDER BY name`;
+        const companiesRes = await db.query(querySql, values);
+        return companiesRes.rows;
+      }
 
 
-    // const querySql = `
-    //     UPDATE companies
-    //     SET ${setCols}
-    //     WHERE handle = ${handleVarIdx}
-    //     RETURNING
-    //         handle,
-    //         name,
-    //         description,
-    //         num_employees AS "numEmployees",
-    //         logo_url AS "logoUrl"`;
-    // const result = await db.query(querySql, [...values, handle]);
-    // const company = result.rows[0];
-
-    if (filterCols) { // values =['apple', 32]
-      console.log('in findAll if filterCols=', filterCols);
-      querySql = `SELECT handle,
+      }  // values = []
+        console.log('in findAll if !filterCols=');
+        querySql = `SELECT handle,
                            name,
                            description,
                            num_employees AS "numEmployees",
                            logo_url AS "logoUrl"
-                           FROM companies
-                     WHERE ${filterCols}
-                     ORDER BY name`;
-    } else { // values = []
-      console.log('in findAll if !filterCols=');
-      querySql = `SELECT handle,
-                         name,
-                         description,
-                         num_employees AS "numEmployees",
-                         logo_url AS "logoUrl"
-                  FROM companies
-                  ORDER BY name`;
-    }
+                    FROM companies
+                    ORDER BY name`;
 
 
 
-    const companiesRes = await db.query(querySql, values);
 
-    // const companiesRes = await db.query(`
-    //     SELECT handle,
-    //            name,
-    //            description,
-    //            num_employees AS "numEmployees",
-    //            logo_url      AS "logoUrl"
-    //     FROM companies
-    //     ORDER BY name`);
-    return companiesRes.rows;
+      const companiesRes = await db.query(querySql);
+      // console.log('*******companiesRes.rows', companiesRes.rows);
+
+      // const companiesRes = await db.query(`
+      //     SELECT handle,
+      //            name,
+      //            description,
+      //            num_employees AS "numEmployees",
+      //            logo_url      AS "logoUrl"
+      //     FROM companies
+      //     ORDER BY name`);
+      return companiesRes.rows;
+
+
+
   }
 
   /** Given a company handle, return data about company.
@@ -202,4 +222,5 @@ class Company {
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
 }
+
 module.exports = Company;

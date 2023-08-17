@@ -53,25 +53,31 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
 
-  let { minEmployees, maxEmployees } = req.query;
+  let { minEmployees, maxEmployees, nameLike} = req.query;
   console.log('minEmployees =', minEmployees);
   console.log('maxEmployees =', maxEmployees);
+
+  let data = {};
+
   if (minEmployees) {
     console.log('Number(minEmployees)=', Number(minEmployees));
     req.query.minEmployees = parseInt(minEmployees);
     // throw new BadRequestError();
+    data.minEmployees = parseInt(minEmployees);
   }
 
   if (maxEmployees) {
     req.query.maxEmployees = Number(maxEmployees);
+    data.maxEmployees = parseInt(maxEmployees);
     // throw new BadRequestError();
   }
 
+  if (nameLike){
+    data.nameLike = nameLike;
+  }
+
   const validator = jsonschema.validate(
-    {
-      minEmployees: parseInt(minEmployees),
-      maxEmployees: parseInt(maxEmployees)
-    },
+    data,
     companyFilterSchema,
     { required: true }
   );
@@ -82,7 +88,7 @@ router.get("/", async function (req, res, next) {
   }
 
   // schecma.validate
-  const companies = await Company.findAll(req.query);
+  const companies = await Company.findAll(data);
 
   // make a filter class method filter(companies,like, min, max)
   // Company.filter(companies,like, min, max)
