@@ -53,26 +53,22 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
 
-  let { minEmployees, maxEmployees, nameLike} = req.query;
-  console.log('minEmployees =', minEmployees);
-  console.log('maxEmployees =', maxEmployees);
+  console.log('req.query=', req.query);
+
+
+  let { minEmployees, maxEmployees, nameLike } = req.query;
 
   let data = {};
 
   if (minEmployees) {
-    console.log('Number(minEmployees)=', Number(minEmployees));
-    req.query.minEmployees = parseInt(minEmployees);
-    // throw new BadRequestError();
     data.minEmployees = parseInt(minEmployees);
   }
 
   if (maxEmployees) {
-    req.query.maxEmployees = Number(maxEmployees);
     data.maxEmployees = parseInt(maxEmployees);
-    // throw new BadRequestError();
   }
 
-  if (nameLike){
+  if (nameLike) {
     data.nameLike = nameLike;
   }
 
@@ -87,15 +83,9 @@ router.get("/", async function (req, res, next) {
     throw new BadRequestError(errs);
   }
 
-  // schecma.validate
   const companies = await Company.findAll(data);
-
-  // make a filter class method filter(companies,like, min, max)
-  // Company.filter(companies,like, min, max)
-
-  // make a filter instance method filter(like, min, max)
-  // const filteredCompanies = companies.filter(nameLike, minEmployees,maxEmployees)
   return res.json({ companies });
+
 });
 
 /** GET /[handle]  =>  { company }

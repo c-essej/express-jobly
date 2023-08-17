@@ -29,7 +29,7 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
   // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
   const cols = keys.map((colName, idx) =>
-      `"${jsToSql[colName] || colName}"=$${idx + 1}`,
+    `"${jsToSql[colName] || colName}"=$${idx + 1}`,
   );
 
   return {
@@ -38,67 +38,52 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
+
+/** takes in an object dataToFilter and  converts them into queries and values
+ * to insert into the queries.
+ *
+ * dataToFilter = {
+ *  nameLike:'davis'
+ *  minEmployees:600,
+ *  maxEmployees:850
+ * }
+ *
+  returns an object like: {
+    filterCols: 'name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3',
+    values: ['%davis%', 600, 850]
+  }
+ */
+
 function sqlForFilter(dataToFilter) {
-  console.log('is this file running');
   const keys = Object.keys(dataToFilter);
 
-  if (keys.length === 0) return { filterCols: '', values: [] };
-
+  const { nameLike, minEmployees, maxEmployees } = dataToFilter;
 
   let result = {
     filterCols: [],
     values: [],
   };
-  const { nameLike, minEmployees, maxEmployees } = dataToFilter;
 
-  if (keys.includes('nameLike')) {
-    // Where name ILIKE $1 , ['%nameLike%']
-    result.filterCols.push(`name ILIKE $1`);
-    result.values.push(`%${nameLike}%`);
+  for (let i = 0; i < keys.length; i++) {
 
-    if (keys.includes('minEmployees')) {
-      result.filterCols.push(`num_employees >= $2`);
+    if (keys[i] === 'nameLike') {
+      result.filterCols.push(`name ILIKE $${i + 1}`);
+      result.values.push(`%${nameLike}%`);
+
+    } else if (keys[i] === 'minEmployees') {
+      result.filterCols.push(`num_employees >= $${i + 1}`);
       result.values.push(minEmployees);
 
-      if (keys.includes('maxEmployees')) {
-        result.filterCols.push(`num_employees <= $3`);
-        result.values.push(maxEmployees);
-      }
-
-    } else { // nameLike,  no minEmployees
-
-      if (keys.includes('maxEmployees')) {
-        result.filterCols.push(`num_employees <= $2`);
-        result.values.push(maxEmployees);
-      }
+    } else {//keys[i] === 'maxEmployees'
+      result.filterCols.push(`num_employees <= $${i + 1}`);
+      result.values.push(maxEmployees);
 
     }
-  } else { // no nameLike
-
-    if (keys.includes('minEmployees')) {
-      result.filterCols.push(`num_employees >= $1`);
-      result.values.push(minEmployees);
-
-      if (keys.includes('maxEmployees')) {
-        result.filterCols.push(`num_employees <= $2`);
-        result.values.push(maxEmployees);
-      }
-
-    } else {// no nameLike and no minEmployees
-
-      if (keys.includes('maxEmployees')) {
-        result.filterCols.push(`num_employees <= $1`);
-        result.values.push(maxEmployees);
-      }
-
-
-    }
-
   }
 
   result.filterCols = result.filterCols.join(' AND ');
-  console.log('******result', result);
 
+  console.log('from sqlForFilter: result = ', result);
   return result;
 }
 

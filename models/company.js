@@ -52,31 +52,36 @@ class Company {
 
   /** Find all companies.
    *
+   * Can filter on provided search filters:
+   * - minEmployees
+   * - maxEmployees
+   * - nameLike (will find case-insensitive, partial matches)
+   *
+   *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
   static async findAll(dataToFilter) {
 
-    // do filter in findAll(like, min, max)
-    //  minEmployees
-    //  maxEmployees
-    //  nameLike (will find case-insensitive, partial matches)
-    let filterCols;
-    let values;
-    let querySql;
-    if (dataToFilter !== undefined){
-      console.log('******dataToFilter', dataToFilter);
+    const keys = Object.keys(dataToFilter);
 
-      let { filterCols, values } = sqlForFilter(dataToFilter);
-      console.log('****line70 filterCols', filterCols);
-      console.log('*****line 71 values', values);
-      filterCols = filterCols;
-      values = values;
+    if (keys.length === 0) {
 
-      const { minEmployees, maxEmployees, nameLike } = dataToFilter;
+      const companiesRes = await db.query(
+        `SELECT
+            handle,
+            name,
+            description,
+            num_employees AS "numEmployees",
+            logo_url AS "logoUrl"
+        FROM companies
+        ORDER BY name`);
 
-      console.log('*****minEmployees', minEmployees);
-      console.log('*****maxEmployees', maxEmployees);
+      return companiesRes.rows;
+
+    } else {
+
+      const { minEmployees, maxEmployees } = dataToFilter;
 
       if (minEmployees !== undefined &&
         minEmployees !== undefined &&
@@ -84,61 +89,22 @@ class Company {
         throw new BadRequestError(`minEmployees should be less than maxEmployees`);
       }
 
-      // const querySql = `
-      //     UPDATE companies
-      //     SET ${setCols}
-      //     WHERE handle = ${handleVarIdx}
-      //     RETURNING
-      //         handle,
-      //         name,
-      //         description,
-      //         num_employees AS "numEmployees",
-      //         logo_url AS "logoUrl"`;
-      // const result = await db.query(querySql, [...values, handle]);
-      // const company = result.rows[0];
+      let { filterCols, values } = sqlForFilter(dataToFilter);
 
-      if (filterCols) { // values =['apple', 32]
-        console.log('in findAll if filterCols=', filterCols);
-        querySql = `SELECT handle,
-                             name,
-                             description,
-                             num_employees AS "numEmployees",
-                             logo_url AS "logoUrl"
-                             FROM companies
-                       WHERE ${filterCols}
-                       ORDER BY name`;
-        const companiesRes = await db.query(querySql, values);
-        return companiesRes.rows;
-      }
+      const querySql = `SELECT
+                          handle,
+                          name,
+                          description,
+                          num_employees AS "numEmployees",
+                          logo_url AS "logoUrl"
+                        FROM companies
+                        WHERE ${filterCols}
+                        ORDER BY name`;
 
-
-      }  // values = []
-        console.log('in findAll if !filterCols=');
-        querySql = `SELECT handle,
-                           name,
-                           description,
-                           num_employees AS "numEmployees",
-                           logo_url AS "logoUrl"
-                    FROM companies
-                    ORDER BY name`;
-
-
-
-
-      const companiesRes = await db.query(querySql);
-      // console.log('*******companiesRes.rows', companiesRes.rows);
-
-      // const companiesRes = await db.query(`
-      //     SELECT handle,
-      //            name,
-      //            description,
-      //            num_employees AS "numEmployees",
-      //            logo_url      AS "logoUrl"
-      //     FROM companies
-      //     ORDER BY name`);
+      const companiesRes = await db.query(querySql, values);
       return companiesRes.rows;
 
-
+    }
 
   }
 
