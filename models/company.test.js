@@ -57,7 +57,7 @@ describe("create", function () {
 });
 
 /************************************** findAll */
-
+//TODO: have filters, but doesnt match
 describe("findAll", function () {
   test("works: no filter", async function () {
     let companies = await Company.findAll();
@@ -126,8 +126,54 @@ describe("findAll", function () {
     ]);
   })
 
+  test("works: filtering by minimum and maximum", async function () {
+    let companies = await Company.findAll({minEmployees: 2, maxEmployees: 5});
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  })
 
+  test("works: filtering for all fields", async function () {
+    let companies = await Company.findAll({nameLike: 'C', minEmployees: 2, maxEmployees: 5});
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  })
 
+  test("throws error if minEmployees greater than maxEmployees", async function () {
+    try {
+      let companies = await Company.findAll({minEmployees: 100, maxEmployees: 50});
+      throw new Error();
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
+  })
 });
 
 /************************************** get */

@@ -58,22 +58,22 @@ router.get("/", async function (req, res, next) {
 
   let { minEmployees, maxEmployees, nameLike } = req.query;
 
-  let data = {};
+  let dataToFilter = {};
 
-  if (minEmployees) {
-    data.minEmployees = parseInt(minEmployees);
+  if (minEmployees !== undefined) {
+    dataToFilter.minEmployees = parseInt(minEmployees);
   }
 
-  if (maxEmployees) {
-    data.maxEmployees = parseInt(maxEmployees);
+  if (maxEmployees !== undefined) {
+    dataToFilter.maxEmployees = parseInt(maxEmployees);
   }
 
-  if (nameLike) {
-    data.nameLike = nameLike;
+  if (nameLike !== undefined) {
+    dataToFilter.nameLike = nameLike;
   }
 
   const validator = jsonschema.validate(
-    data,
+    dataToFilter,
     companyFilterSchema,
     { required: true }
   );
@@ -83,7 +83,7 @@ router.get("/", async function (req, res, next) {
     throw new BadRequestError(errs);
   }
 
-  const companies = await Company.findAll(data);
+  const companies = await Company.findAll(dataToFilter);
   return res.json({ companies });
 
 });

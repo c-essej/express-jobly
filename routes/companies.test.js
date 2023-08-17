@@ -95,6 +95,118 @@ describe("GET /companies", function () {
           ],
     });
   });
+
+  test("filters for one field", async function() {
+    const resp = await request(app).get("/companies/?minEmployees=1");
+    expect(resp.statusCode).toEqual(200)
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c1",
+              name: "C1",
+              description: "Desc1",
+              numEmployees: 1,
+              logoUrl: "http://c1.img",
+            },
+            {
+              handle: "c2",
+              name: "C2",
+              description: "Desc2",
+              numEmployees: 2,
+              logoUrl: "http://c2.img",
+            },
+            {
+              handle: "c3",
+              name: "C3",
+              description: "Desc3",
+              numEmployees: 3,
+              logoUrl: "http://c3.img",
+            },
+          ],
+    })
+  });
+
+  test("filters for two field", async function() {
+    const resp = await request(app).get("/companies/?minEmployees=1&maxEmployees=2");
+    expect(resp.statusCode).toEqual(200)
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c1",
+              name: "C1",
+              description: "Desc1",
+              numEmployees: 1,
+              logoUrl: "http://c1.img",
+            },
+            {
+              handle: "c2",
+              name: "C2",
+              description: "Desc2",
+              numEmployees: 2,
+              logoUrl: "http://c2.img",
+            },
+          ],
+    })
+  });
+
+  test("for error if wrong type in query string", async function() {
+    const resp = await request(app).get("/companies/?minEmployees=1&maxEmployees=s");
+    expect(resp.statusCode).toEqual(400)
+    expect(resp.body).toEqual({
+      "error": {
+        "message": [
+          "instance.maxEmployees is not of a type(s) integer"
+        ],
+        "status": 400
+      }
+    })
+  });
+
+  test("for error if wrong key in query string", async function() {
+    const resp = await request(app).get("/companies/?miEmployees=1");
+    expect(resp.statusCode).toEqual(200)
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c1",
+              name: "C1",
+              description: "Desc1",
+              numEmployees: 1,
+              logoUrl: "http://c1.img",
+            },
+            {
+              handle: "c2",
+              name: "C2",
+              description: "Desc2",
+              numEmployees: 2,
+              logoUrl: "http://c2.img",
+            },
+            {
+              handle: "c3",
+              name: "C3",
+              description: "Desc3",
+              numEmployees: 3,
+              logoUrl: "http://c3.img",
+            },
+          ],
+    })
+  });
+
+
+  test("for error if minEmployees greater than maxEmployees", async function() {
+    const resp = await request(app).get("/companies/?minEmployees=3&maxEmployees=1");
+    expect(resp.statusCode).toEqual(400)
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "minEmployees should be less than maxEmployees",
+        "status": 400
+      }
+    })
+  });
+
 });
 
 /************************************** GET /companies/:handle */

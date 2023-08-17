@@ -63,9 +63,8 @@ class Company {
 
   static async findAll(dataToFilter) {
 
-    const keys = Object.keys(dataToFilter);
+    if (dataToFilter === undefined || Object.keys(dataToFilter).length === 0) {
 
-    if (keys.length === 0) {
 
       const companiesRes = await db.query(
         `SELECT
