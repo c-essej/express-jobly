@@ -122,10 +122,10 @@ describe("ensureSameUserOrAdmin", function () {
     expect(() => ensureSameUserOrAdmin(req, res, next))
       .toThrow(UnauthorizedError);
   });
-  //TODO: locals. add user:{username:...}
+
   test("unauth if not admin", function () {
     const req = { params: { username: 'test' } };
-    const res = { locals: { user: { isAdmin: false } } };
+    const res = { locals: { user: { username: 'test1', isAdmin: false } } };
     expect(() => ensureSameUserOrAdmin(req, res, next))
       .toThrow(UnauthorizedError);
   });

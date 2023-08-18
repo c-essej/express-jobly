@@ -64,8 +64,8 @@ describe("POST /users", function () {
       }
     });
   });
-  // TODO: error => unarthrized
-  test("error for anon: creating a user", async function () {
+
+  test("unauthorized error for anon: creating a user", async function () {
     const resp = await request(app)
       .post("/users")
       .send({
@@ -149,8 +149,8 @@ describe("POST /users", function () {
       token: expect.any(String)
     });
   });
-  // TODO: bad request
-  test("incorrect type in input field", async function () {
+
+  test("bad request error for incorrect type in input field", async function () {
     const resp = await request(app)
       .post("/users")
       .send({
@@ -173,7 +173,7 @@ describe("POST /users", function () {
     });
   });
 
-  test("missing input field", async function () {
+  test("bad request error for missing input field", async function () {
     const resp = await request(app)
       .post("/users")
       .send({
@@ -238,7 +238,7 @@ describe("GET /users", function () {
     });
   });
 
-  test("error for non-admin", async function () {
+  test("unauthorized error for non-admin", async function () {
     const resp = await request(app)
       .get("/users")
       .set("authorization", `Bearer ${u1Token}`);
@@ -259,9 +259,8 @@ describe("GET /users", function () {
 });
 
 /************************************** GET /users/:username */
-//TODO: same user
 describe("GET /users/:username", function () {
-  test("works for users", async function () {
+  test("works for same users", async function () {
     const resp = await request(app)
       .get(`/users/u1`)
       .set("authorization", `Bearer ${u1Token}`);
@@ -296,15 +295,15 @@ describe("GET /users/:username", function () {
       .get(`/users/u1`);
     expect(resp.statusCode).toEqual(401);
   });
-  // TODO:
-  test("not working for seeing other user's file ", async function () {
+
+  test("unauthorized error for seeing other user's file ", async function () {
     const resp = await request(app)
       .get(`/users/u2`)
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
   });
-  // TODO: unarthrozied
-  test("not found if user not found by user ", async function () {
+
+  test("unauthorized error for if user not found by user ", async function () {
     const resp = await request(app)
       .get(`/users/nope`)
       .set("authorization", `Bearer ${u1Token}`);
@@ -406,8 +405,8 @@ describe("PATCH /users/:username", () => {
       });
     expect(resp.statusCode).toEqual(401);
   });
-  // unarthorized
-  test("not working for setting non-password data", async function () {
+
+  test("unauthorized error for setting non-password data", async function () {
     const resp = await request(app)
       .patch(`/users/u2`)
       .send({
@@ -417,7 +416,7 @@ describe("PATCH /users/:username", () => {
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("not working for setting other user's password ", async function () {
+  test("unauthorized error for setting other user's password ", async function () {
     const resp = await request(app)
       .patch(`/users/u2`)
       .send({
@@ -472,9 +471,9 @@ describe("PATCH /users/:username", () => {
 
 
 /************************************** DELETE /users/:username */
-// TODO:
+
 describe("DELETE /users/:username", function () {
-  test("bad request if user tries to delete another user", async function () {
+  test("unauthorized error if user tries to delete another user", async function () {
     const resp = await request(app)
       .delete(`/users/u2`)
       .set("authorization", `Bearer ${u1Token}`);

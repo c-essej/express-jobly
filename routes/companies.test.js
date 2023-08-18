@@ -91,6 +91,17 @@ describe("POST /companies", function () {
   });
 
 
+  test("unauthorized user with bad data", async function () {
+    const resp = await request(app)
+      .post("/companies")
+      .send({
+        ...newCompany,
+        logoUrl: "not-a-url",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+  })
+
 });
 
 /************************************** GET /companies */
@@ -156,7 +167,8 @@ describe("GET /companies", function () {
         ],
     });
   });
-  //TODO: can use diff syntax. request(app).get(put in endpoint/ .query)
+  // can use diff syntax. request(app).get(put in endpoint/ ).query
+
   test("filters for two field", async function () {
     const resp = await request(app).get("/companies/?minEmployees=1&maxEmployees=2");
     expect(resp.statusCode).toEqual(200);
@@ -277,7 +289,7 @@ describe("GET /companies/:handle", function () {
 /************************************** PATCH /companies/:handle */
 
 describe("PATCH /companies/:handle", function () {
-  test("not works for users", async function () {
+  test("unauthorized for users", async function () {
     const resp = await request(app)
       .patch(`/companies/c1`)
       .send({
@@ -352,12 +364,23 @@ describe("PATCH /companies/:handle", function () {
       .set("authorization", `Bearer ${admin1Token}`);
     expect(resp.statusCode).toEqual(400);
   });
+
+  test("unauthorized user with bad data", async function () {
+    const resp = await request(app)
+      .patch(`/companies/c1`)
+      .send({
+        logoUrl: "not-a-url",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
 });
 
 /************************************** DELETE /companies/:handle */
-// TODO: not works to unauthorized
+
 describe("DELETE /companies/:handle", function () {
-  test("not works for users", async function () {
+  test("unauthorized for users", async function () {
     const resp = await request(app)
       .delete(`/companies/c1`)
       .set("authorization", `Bearer ${u1Token}`);
@@ -370,6 +393,14 @@ describe("DELETE /companies/:handle", function () {
       }
     });
 
+  });
+
+  test("unauthorized user with bad data", async function() {
+    const resp = await request(app)
+      .delete(`/companies/nope`)
+      .set("authorization", `Bearer ${u1Token}`);
+
+      expect(resp.statusCode).toEqual(401);
   });
 
   test("works for admins", async function () {
@@ -394,6 +425,5 @@ describe("DELETE /companies/:handle", function () {
       .set("authorization", `Bearer ${admin1Token}`);
     expect(resp.statusCode).toEqual(404);
   });
-});
 
-//TODO: test for authorized user with bad data => should return 401
+});

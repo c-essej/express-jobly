@@ -58,8 +58,11 @@ function ensureAdmin(req, res, next) {
  */
 
 function ensureSameUserOrAdmin(req, res, next) {
-  // TODO: one more check res.locals.user is not undefined
-  // before  get the username
+
+  if (res.locals.user === undefined) throw new UnauthorizedError();
+
+  if (res.locals.user.username === undefined) throw new UnauthorizedError();
+
   if (res.locals.user?.username === req.params.username
     || res.locals.user?.isAdmin === true) {
     return next();
