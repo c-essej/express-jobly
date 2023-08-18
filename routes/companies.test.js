@@ -355,7 +355,7 @@ describe("PATCH /companies/:handle", function () {
 });
 
 /************************************** DELETE /companies/:handle */
-
+// TODO: not works to unauthorized
 describe("DELETE /companies/:handle", function () {
   test("not works for users", async function () {
     const resp = await request(app)
@@ -395,3 +395,5 @@ describe("DELETE /companies/:handle", function () {
     expect(resp.statusCode).toEqual(404);
   });
 });
+
+//TODO: test for authorized user with bad data => should return 401

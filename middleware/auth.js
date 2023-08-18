@@ -51,17 +51,19 @@ function ensureAdmin(req, res, next) {
 }
 
 
-/** Middleware to use to check if it is the user from the param.
+/** Middleware to use to check if it is the user from the param
+ * or if the user is an admin .
  *
  * If not, raises Unauthorized error.
  */
 
 function ensureSameUserOrAdmin(req, res, next) {
-  console.log('res.locals.user?.username=', res.locals.user?.username);
-  console.log('req.params.username', req.params.username);
-
-
-  if (res.locals.user?.username === req.params.username || res.locals.user?.isAdmin === true) return next();
+  // TODO: one more check res.locals.user is not undefined
+  // before  get the username
+  if (res.locals.user?.username === req.params.username
+    || res.locals.user?.isAdmin === true) {
+    return next();
+  };
   throw new UnauthorizedError();
 }
 

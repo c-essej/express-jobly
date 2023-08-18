@@ -64,7 +64,7 @@ describe("POST /users", function () {
       }
     });
   });
-
+  // TODO: error => unarthrized
   test("error for anon: creating a user", async function () {
     const resp = await request(app)
       .post("/users")
@@ -149,7 +149,7 @@ describe("POST /users", function () {
       token: expect.any(String)
     });
   });
-
+  // TODO: bad request
   test("incorrect type in input field", async function () {
     const resp = await request(app)
       .post("/users")
@@ -259,7 +259,7 @@ describe("GET /users", function () {
 });
 
 /************************************** GET /users/:username */
-
+//TODO: same user
 describe("GET /users/:username", function () {
   test("works for users", async function () {
     const resp = await request(app)
@@ -296,14 +296,14 @@ describe("GET /users/:username", function () {
       .get(`/users/u1`);
     expect(resp.statusCode).toEqual(401);
   });
-
+  // TODO:
   test("not working for seeing other user's file ", async function () {
     const resp = await request(app)
       .get(`/users/u2`)
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
   });
-
+  // TODO: unarthrozied
   test("not found if user not found by user ", async function () {
     const resp = await request(app)
       .get(`/users/nope`)
@@ -396,7 +396,7 @@ describe("PATCH /users/:username", () => {
     });
     const isSuccessful = await User.authenticate("u1", "new-password");
     expect(isSuccessful).toBeTruthy();
-    });
+  });
 
   test("unauth for anon", async function () {
     const resp = await request(app)
@@ -406,7 +406,7 @@ describe("PATCH /users/:username", () => {
       });
     expect(resp.statusCode).toEqual(401);
   });
-
+  // unarthorized
   test("not working for setting non-password data", async function () {
     const resp = await request(app)
       .patch(`/users/u2`)
@@ -417,7 +417,7 @@ describe("PATCH /users/:username", () => {
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("not working for setting other user's password ", async function() {
+  test("not working for setting other user's password ", async function () {
     const resp = await request(app)
       .patch(`/users/u2`)
       .send({
@@ -468,30 +468,30 @@ describe("PATCH /users/:username", () => {
     expect(resp.statusCode).toEqual(400);
   });
 
-  });
+});
 
 
 /************************************** DELETE /users/:username */
-
+// TODO:
 describe("DELETE /users/:username", function () {
-  test("bad request if user tries to delete another user", async function() {
+  test("bad request if user tries to delete another user", async function () {
     const resp = await request(app)
       .delete(`/users/u2`)
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
-  })
+  });
 
   test("works for users deleting their own profile", async function () {
     const resp = await request(app)
-    .delete(`/users/u1`)
-    .set("authorization", `Bearer ${u1Token}`);
+      .delete(`/users/u1`)
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({ deleted: "u1" });
   });
 
   test("works for admin deleting a user", async function () {
     const resp = await request(app)
-    .delete(`/users/u2`)
-    .set("authorization", `Bearer ${admin1Token}`);
+      .delete(`/users/u2`)
+      .set("authorization", `Bearer ${admin1Token}`);
     expect(resp.body).toEqual({ deleted: "u2" });
   });
 
