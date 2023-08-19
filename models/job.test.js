@@ -39,7 +39,7 @@ describe("create", function () {
         salary: 123456,
         equity: '0.1',
         company_handle: "c1",
-      },
+      }
     ]);
   });
 
@@ -52,12 +52,14 @@ describe("findAll", function () {
     let jobs = await Job.findAll();
     expect(jobs).toEqual([
       {
-        title: "new",
-        salary: 123456,
-        equity: '0.1',
+        title: "j1",
+        salary: 111111,
+        equity: '0.96',
         company_handle: "c1",
-      },
+      }
     ]);
   });
 
 });
+
+
