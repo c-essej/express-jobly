@@ -17,7 +17,7 @@ afterAll(commonAfterAll);
 
 /************************************** create */
 
-describe("create", function (){
+describe("create", function () {
   const newJob = {
     title: "new",
     salary: 123456,
@@ -30,7 +30,7 @@ describe("create", function (){
     expect(job).toEqual(newJob);
 
     const result = await db.query(
-          `SELECT title, salary, equity, company_handle
+      `SELECT title, salary, equity, company_handle
            FROM jobs
            WHERE title = 'new'`);
     expect(result.rows).toEqual([
@@ -43,6 +43,21 @@ describe("create", function (){
     ]);
   });
 
-})
+});
 
+/************************************** findAll */
 
+describe("findAll", function () {
+  test("works: no filter", async function () {
+    let jobs = await Job.findAll();
+    expect(jobs).toEqual([
+      {
+        title: "new",
+        salary: 123456,
+        equity: '0.1',
+        company_handle: "c1",
+      },
+    ]);
+  });
+
+});

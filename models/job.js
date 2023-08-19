@@ -18,9 +18,9 @@ class Job {
   * Throws BadRequestError if job already in database.
   * */
 
-  static async create({ title, salary, equity, company_handle}) {
+  static async create({ title, salary, equity, company_handle }) {
 
-  const result = await db.query(`
+    const result = await db.query(`
       INSERT INTO jobs (title,
                         salary,
                         equity,
@@ -31,32 +31,44 @@ class Job {
         salary,
         equity,
         company_handle`, [
-  title,
-  salary,
-  equity,
-  company_handle
-  ],
-  );
+      title,
+      salary,
+      equity,
+      company_handle
+    ],
+    );
 
-  const job = result.rows[0];
+    const job = result.rows[0];
 
-  return job;
+    return job;
 
   }
-}
 
-//   /** Find all companies.
-//   *
-//   * Can filter on provided search filters:
-//   * - minEmployees
-//   * - maxEmployees
-//   * - nameLike (will find case-insensitive, partial matches)
-//   *
-//   * if nothing to filter, return all companies
-//   * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
-//   * */
 
-//   static async findAll(dataToFilter);
+  /** Find all companies.
+  *
+  * Can filter on provided search filters:
+  * - minEmployees
+  * - maxEmployees
+  * - nameLike (will find case-insensitive, partial matches)
+  *
+  * if nothing to filter, return all companies
+  * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+  * */
+
+static async findAll(){
+
+  const jobsRes = await db.query(
+    `SELECT
+        title,
+        salary,
+        equity,
+        company_handle
+      FROM jobs
+      ORDER BY title`);
+
+  return jobsRes.rows;
+  }
 
 
 //   /** Given a job handle, return data about job.
@@ -94,6 +106,6 @@ class Job {
 //   static async remove(handle);
 // }
 
-
+}
 
 module.exports = Job;
